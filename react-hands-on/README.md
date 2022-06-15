@@ -1,140 +1,46 @@
-# React & TypeScript メモ
+# Getting Started with Create React App
 
-- ## ts でスプレット構文を書くには、Down leveling が必要
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-  ```tsx
-  <AddColorForm
-    onNewColor={(title: string, color: string) => {
-      const newColor: SetStateAction<Color[]> = [
-        ...colors,
-        {
-          id: v4(),
-          rating: 0,
-          title,
-          color,
-          kkkkkkkkkk,
-        },
-      ];
-      setColors(newColor);
-    }}
-  />
-  ```
+## Available Scripts
 
-  > ### Down leveling（ダウンレベリング）とは
-  >
-  > Down leveling（ダウンレベリング）というのは、古いバージョンの JS コードにコンパイルするという意味の TypeScript 用語です。
-  > target が ES3 または ES5 の際に、ジェネレータの yield\*や for..of 構文などの ES6 から追加されたイテレーション系の記法を、より正確なコードにコンパイルしたい場合に true にします。
+In the project directory, you can run:
 
-- React + TypeScript でカスタムフックの返す返す方にタプル型を指定したところ、互換性エラーで怒られてしまいました。そのときのメモです。
+### `npm start`
 
-  まず、useState フックのおさらいから入ります。すでに、理解している人はスルーしてください。
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-  ## 【useState フックとは?】
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-  ### useState フック
+### `npm test`
 
-  useState フックは、「初期値の型に応じた値」と「その値を変更する関数」の２つの要素を用意したタプルを返します。タプル(配列)として返すことで、デストラクチャリングにより自分で変数の名前を設定することができます。
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-  > **タプル(tuple)** - 複数のタイプの値を扱うことのできる不変(Immutable)な配列
+### `npm run build`
 
-  カスタムフック作成して明示的にタプル型を指定しなかった場合、カスタムフックの使用先で以下のようなエラーが現れました。
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-  ### カスタムフック
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-  ```tsx
-  export const useInput = (initialValue: string) => {
-    const [value, setValue] = useState(initialValue);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(e.target.value);
-    return [
-      {
-        value: value,
-        onChange: handleChange,
-      },
-      () => setValue(initialValue),
-    ];
-  };
-  ```
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-  ### カスタムフックの使用先
+### `npm run eject`
 
-  ```tsx
-  const AddColorForm: React.FC<Props> = ({ onNewColor = () => undefined }) => {
-  const [titleProps, resetTitle] = useInput("");
-  const [colorProps, resetColor] = useInput("#000000");
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onNewColor(titleProps.value, colorProps.value); // Property 'value' does not exist on type '(() => void) ...
-    resetTitle();
-    resetColor();
-  };
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-  return (
-    <form onSubmit={submit}>
-    ...
-    );
-  };
-  ```
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-  ```
-  Property 'value' does not exist on type '(() => void) | { value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; }'.
-  Property 'value' does not exist on type '() => void'.
-  ```
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-  `Property 'value' does not exist on type '() => void'.`2 行目のエラーで互換性がないと言われている型に注目してください。本来の value の型は、string 型ですが、ts に推測された型は、() => void をとなっています。
+## Learn More
 
-  **通常の配列ではなく、タプルを推測する場合、 TypeScript に通知する必要があります**。
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-  このエラーは以下の解決策は、2 つあります。
-
-  ## 【解決策】
-
-  ### 1. タプルの型を明示的に指定する
-
-  ```tsx
-  type Input = readonly [
-    {
-      readonly value: string;
-      readonly onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    },
-    () => void
-  ];
-
-  export const useInput = (initialValue: string): Input => {
-    const [value, setValue] = useState(initialValue);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(e.target.value);
-    return [
-      {
-        value: value,
-        onChange: handleChange,
-      },
-      () => setValue(initialValue),
-    ];
-  };
-  ```
-
-  type キーワードを使って型を作成して前述の通り、明示的に定義します。
-
-  ### 2. `as const` キーワードを使用する
-
-  ```tsx
-  export const useInput = (initialValue: string) => {
-    const [value, setValue] = useState(initialValue);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(e.target.value);
-    return [
-      {
-        value: value,
-        onChange: handleChange,
-      },
-      () => setValue(initialValue),
-    ] as const;
-  };
-  ```
-
-  `as const` キーワードは配列やオブジェクトを内部の要素を含め readonly(読み取り専用)にします。as const キワードを付け加えることにより、返す型を不変なタプルに変更することができました。
-
-  以上、カスタムフックにタプル型を指定する方法でした。
-  タプル型の指定には、推論が効かないのでお気をつけください!
+To learn React, check out the [React documentation](https://reactjs.org/).
